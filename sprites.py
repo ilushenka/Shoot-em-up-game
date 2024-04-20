@@ -2,7 +2,7 @@ import pygame as pg
 from random import randint, choice, randint, uniform
 from math import cos, sin, radians
 import sprite_utilities as su
-from constants import *
+import constants as const
 
 
 #создание группы спрайтов
@@ -18,8 +18,8 @@ bonuses = pg.sprite.Group()
 
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, player_features, screen_width=WIDTH, 
-                 screen_height=HEIGHT, sound_volume=100):
+    def __init__(self, player_features, screen_width=const.WIDTH, 
+                 screen_height=const.HEIGHT, sound_volume=100):
         super().__init__() 
 
         self.features = su.Sprite_features(player_features, screen_width, 
@@ -30,9 +30,10 @@ class Player(pg.sprite.Sprite):
         self.screen_height = screen_height
         
         self.last_time_shoot = -500
-        self.shoot_delay = DEFAULT_SHOOT_DELAY
+        self.shoot_delay = const.DEFAULT_SHOOT_DELAY
         self.shoot_mode = su.ShootModes.DEFAULT
-        self.bonus_time = 0
+        self.bonus_time = {'shoot_delay': 0,
+                           'shoot_mode': 0}
 
         self.is_invincible = False
         self.invincible_animation = 0
@@ -46,6 +47,7 @@ class Player(pg.sprite.Sprite):
     def update(self):
         pressed_key = pg.key.get_pressed()
         self.image = self.features.back
+        #сделать switch
         if(pressed_key[self.features.forward_button] and self.rect.top > 0):
             self.rect.y -= self.features.mov_speed
             self.image = self.features.forward
@@ -64,19 +66,11 @@ class Player(pg.sprite.Sprite):
            pg.time.get_ticks() - self.last_time_shoot >= self.shoot_delay):
             self.last_time_shoot = pg.time.get_ticks()
             self.shoot()
-        if self.is_invincible:
-            if(pg.time.get_ticks() - self.invincible_time 
-               > DEFAULT_DAMAGED_TIME):
-                self.is_invincible = False
-            else:
-                animation = [self.image, self.features.disappear]
-                self.invincible_animation += 0.25
-                self.image = animation[int(self.invincible_animation)%2]
-        if(self.shoot_mode != su.ShootModes.DEFAULT \
-           and pg.time.get_ticks() - self.bonus_time >= BONUS_DURATION):
-            self.shoot_mode = su.ShootModes.DEFAULT
-        self.check_collision()
 
+        self.check_invincibility()
+        self.check_bonuses()
+        Player.check_collision()
+    
     def shoot(self):
         for i in range(1, self.shoot_mode):
             left_bullet = Bullet(self.features.bullet_speed, 
@@ -103,7 +97,8 @@ class Player(pg.sprite.Sprite):
         su.play_sound(self.features.shoot_sound, 
                                     self.sound_volume)
 
-    def check_collision(self):
+    @staticmethod
+    def check_collision():
         hits = pg.sprite.groupcollide(player, mobs, False, False)
         for hit in hits.keys():
             if not hit.is_invincible:
@@ -119,6 +114,26 @@ class Player(pg.sprite.Sprite):
             return
         if not self.is_invincible:
             self.get_invincibility(pg.time.get_ticks())
+    
+    def check_bonuses(self):
+        if(self.shoot_mode != su.ShootModes.DEFAULT \
+           and pg.time.get_ticks() - self.bonus_time['shoot_mode'] \
+            >= const.BONUS_DURATION):
+            self.shoot_mode = su.ShootModes.DEFAULT
+        if(self.shoot_delay != const.DEFAULT_SHOOT_DELAY \
+           and pg.time.get_ticks() - self.bonus_time['shoot_delay'] \
+            >= const.BONUS_DURATION):
+            self.shoot_delay = const.DEFAULT_SHOOT_DELAY
+
+    def check_invincibility(self):
+        if self.is_invincible:
+            if(pg.time.get_ticks() - self.invincible_time 
+                > const.DEFAULT_DAMAGED_TIME):
+                self.is_invincible = False
+            else:
+                animation = [self.image, self.features.disappear]
+                self.invincible_animation += 0.25
+                self.image = animation[int(self.invincible_animation)%2]
 
     def get_invincibility(self, time):
         self.is_invincible = True
@@ -127,8 +142,8 @@ class Player(pg.sprite.Sprite):
 
 
 class Mob(pg.sprite.Sprite):
-    def __init__(self, mob_features, screen_width=WIDTH, 
-                 screen_height=HEIGHT, sound_volume=100):
+    def __init__(self, mob_features, screen_width=const.WIDTH, 
+                 screen_height=const.HEIGHT, sound_volume=100):
         super().__init__()
         
         self.features = su.Sprite_features(mob_features, screen_width, 
@@ -144,8 +159,8 @@ class Mob(pg.sprite.Sprite):
         self.set_trajectory()
 
     @staticmethod
-    def spawnMobs(mobs_num, mob_features, screen_width=WIDTH, 
-                  screen_height=HEIGHT, sound_volume=100):
+    def spawnMobs(mobs_num, mob_features, screen_width=const.WIDTH, 
+                  screen_height=const.HEIGHT, sound_volume=100):
         for _ in range(mobs_num):
             mob = Mob(mob_features, screen_width, screen_height, 
                       sound_volume)
@@ -169,15 +184,15 @@ class Mob(pg.sprite.Sprite):
            or self.rect.right < -4*self.rect.width \
            or self.rect.left > self.screen_width + 4*self.rect.width):
             self.set_trajectory()
-            self.features.health = DEFAULT_MOB_HEALTH
-        if(uniform(0,100) <= DEFAULT_MOB_SHOOT_CHANCE):
+            self.features.health = const.DEFAULT_MOB_HEALTH
+        if(uniform(0,100) <= const.DEFAULT_MOB_SHOOT_CHANCE):
             self.shoot()  
 
     def check_health(self):
         if self.features.health == 0:
             su.play_sound(self.features.dead_sound)
             self.kill()
-            if uniform(0, 100) <= DEFAULT_BONUS_DROP_CHANCE:
+            if uniform(0, 100) <= const.DEFAULT_BONUS_DROP_CHANCE:
                 Bonus.spawn_bonus(self.rect.x, self.rect.y, 
                                   self.screen_width, self.screen_height, self.sound_volume)
 
@@ -249,7 +264,8 @@ class Mob(pg.sprite.Sprite):
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, mov_speed, bullet_texture, start_x, 
-                 start_y, screen_width=WIDTH, screen_height=HEIGHT, 
+                 start_y, screen_width=const.WIDTH, 
+                 screen_height=const.HEIGHT, 
                  sound_volume=100, angle=0):
         super().__init__()
         self.image = pg.transform.rotate(bullet_texture, angle)
@@ -278,7 +294,8 @@ class Bullet(pg.sprite.Sprite):
             for bullet in bullets:
                 Effects(max(hit.rect.left, bullet.rect.left), 
                         max(hit.rect.top, bullet.rect.top), 
-                        su.explosion_animation, EXPLOSION_ANIMATION_TIME)
+                        su.explosion_animation, 
+                        const.EXPLOSION_ANIMATION_TIME)
                 bullet.kill()
             hit.features.health -= 0 if type(hit) is Player \
                                          and hit.is_invincible else 1
@@ -288,19 +305,21 @@ class Bullet(pg.sprite.Sprite):
 
 class Bonus(pg.sprite.Sprite):
     def __init__(self, bonus_texture, bonus_name, spawn_x, spawn_y, 
-                 screen_width=WIDTH, screen_height=HEIGHT, sound_volume=100):
+                 screen_width=const.WIDTH, screen_height=const.HEIGHT, 
+                 sound_volume=100):
         super().__init__()
         self.spawn_time = pg.time.get_ticks()
         self.bonus_name = bonus_name
         self.animation = [pg.transform.scale( \
             pg.image.load(bonus_texture[i]).convert_alpha(), 
-            (screen_width/WIDTH*BONUS_SIZE,screen_height/HEIGHT*BONUS_SIZE)) \
+            (screen_width/const.WIDTH*const.BONUS_SIZE,
+             screen_height/const.HEIGHT*const.BONUS_SIZE)) \
             for i in range(len(bonus_texture))]
         self.image = self.animation[0]
         self.rect = self.image.get_rect()
         self.rect.x = spawn_x
         self.rect.y = spawn_y
-        self.speed = DEFAULT_BONUS_SPEED
+        self.speed = const.DEFAULT_BONUS_SPEED
         self.animation_time = 0
 
         self.sound = pg.mixer.Sound(su.bonus_sound)
@@ -310,8 +329,8 @@ class Bonus(pg.sprite.Sprite):
         self.screen_height = screen_height
 
     @staticmethod
-    def spawn_bonus(spawn_x, spawn_y, 
-                    screen_width=WIDTH, screen_height=HEIGHT, sound_volume=100):
+    def spawn_bonus(spawn_x, spawn_y, screen_width=const.WIDTH, 
+                    screen_height=const.HEIGHT, sound_volume=100):
         bonus_name = choice([items for items in su.bonus_textures.keys()])
         bonus = Bonus(su.bonus_textures[bonus_name], bonus_name, 
                       spawn_x, spawn_y, screen_width, screen_height, 
@@ -320,7 +339,7 @@ class Bonus(pg.sprite.Sprite):
         all_sprites.add(bonus)
 
     def update(self):
-        if(pg.time.get_ticks() - self.spawn_time >= BONUS_LIFETIME \
+        if(pg.time.get_ticks() - self.spawn_time >= const.BONUS_LIFETIME \
            or self.rect.top > self.screen_height):
             self.kill()
         self.rect.y += self.speed
@@ -330,31 +349,41 @@ class Bonus(pg.sprite.Sprite):
     @staticmethod
     def check_collisions():
         collisions = pg.sprite.groupcollide(player, bonuses, False, False)
-        for mob, bonus in collisions.items():
+        for person, bonus in collisions.items():
             for item in bonus:
                 su.play_sound(item.sound, item.sound_volume)
                 if item.bonus_name == 'heal_bonus':
-                    Bonus.add_health(mob)
+                    Bonus.add_health(person)
                 elif item.bonus_name == 'bullet_bonus':
-                    Bonus.change_shoot_mode(mob)
+                    Bonus.change_shoot_mode(person)
+                else:
+                    Bonus.change_shoot_delay(person)
                 item.kill()
 
     @staticmethod
     def add_health(person):
-        person.features.health += DEFAULT_BONUS_HEAL
-        if person.features.health > DEFAULT_PLAYER_HEALTH:
-            person.features.health = DEFAULT_PLAYER_HEALTH
+        person.features.health += const.DEFAULT_BONUS_HEAL
+        if person.features.health > const.DEFAULT_PLAYER_HEALTH:
+            person.features.health = const.DEFAULT_PLAYER_HEALTH
 
     @staticmethod
-    def change_shoot_mode(mob):
-        if mob.shoot_mode == su.ShootModes.SEVEN_SHOT:
+    def change_shoot_mode(person):
+        if person.shoot_mode == su.ShootModes.SEVEN_SHOT:
             pass
         else:
-            mob.shoot_mode += 1
-        mob.bonus_time = pg.time.get_ticks()
+            person.shoot_mode += 1
+        person.bonus_time['shoot_mode'] = pg.time.get_ticks()
+
+    @staticmethod
+    def change_shoot_delay(person):
+        if person.shoot_delay > const.MIN_SHOOT_DELAY:
+            person.shoot_delay /= const.SHOOT_DELAY_COEF
+            if person.shoot_delay < const.MIN_SHOOT_DELAY:
+                person.shoot_delay = const.MIN_SHOOT_DELAY
+        person.bonus_time['shoot_delay'] = pg.time.get_ticks()
 
     def check_animation(self):
-        self.animation_time += BONUS_ANIMATION
+        self.animation_time += const.BONUS_ANIMATION
         self.image \
             = self.animation[int(self.animation_time)%len(self.animation)]       
 
@@ -370,7 +399,7 @@ class Effects(pg.sprite.Sprite):
         self.rect.y = y
 
         self.current_animation = 0
-        self.tick = len(animation_list)/(FPS*animation_time)
+        self.tick = len(animation_list)/(const.FPS*animation_time)
         all_sprites.add(self)
     def update(self):  
         self.current_animation += self.tick
@@ -384,14 +413,13 @@ class Effects(pg.sprite.Sprite):
 
 class Button():
     def __init__(self, x, y, width, height, text, texture_path, 
-                 text_font=DEFAULT_FONT_SIZE, hover_texture_path=None, 
-                 sound_path=None):
+                 font, hover_texture_path=None, sound_path=None):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.text = text
-        self.text_font = text_font
+        self.font = font
         self.is_hovered = False            
 
         self.image = pg.image.load(texture_path)
@@ -414,8 +442,7 @@ class Button():
             image = self.hover_image
         else:
             image = self.image
-        font = pg.font.Font(None, self.text_font)
-        text_surface = font.render(self.text, True, RED)
+        text_surface = self.font.render(self.text, True, const.RED)
         text_rect = text_surface.get_rect(center=self.rect.center)
         
         screen.blit(image, self.rect.topleft)
@@ -446,10 +473,11 @@ class Button():
 
 class Controls_button(Button):
     def __init__(self, x, y, width, height, text, control_button, 
-                 key, texture_path, text_font=DEFAULT_FONT_SIZE, 
-                 hover_texture_path=None, sound_path=None):
+                 key, texture_path, font, hover_texture_path=None, 
+                 sound_path=None):
         super().__init__(x, y, width, height, text, texture_path, 
-                         text_font, hover_texture_path, sound_path)
+                         font, hover_texture_path, 
+                         sound_path)
         self.control_button = control_button
         self.key = key
 
@@ -494,7 +522,7 @@ class Cursor():
             screen.blit(self.cursor, pg.mouse.get_pos())
 
     def check_hover(self, event, volume=100):
-        if event.type == pg.MOUSEBUTTONDOWN:
+        if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             self.cursor = self.active_texture
             su.play_sound(self.sound, volume)       
         else:

@@ -1,4 +1,5 @@
-from constants import *
+import constants as const
+import pygame as pg
 from sprites import Button, Controls_button
 
 
@@ -21,7 +22,8 @@ def print_text(screen, string, font, color, x=0, y=0):
     text_rect = text_surface.get_rect(center=(x, y))
     screen.blit(text_surface, text_rect)
 
-def set_background_image(screen, image, width=WIDTH, height=HEIGHT):
+def set_background_image(screen, image, width=const.WIDTH, 
+                         height=const.HEIGHT):
     background_image = pg.image.load(image).convert()
     screen.blit(pg.transform.scale(background_image, 
                                    (width, height)), (0, 0))    
@@ -177,7 +179,7 @@ class Slider:
         # label
         self.font = text_font
         self.text = self.font.render('volume: ' + str(int(self.get_value())), 
-                                     True, CREAM, None)
+                                     True, const.CREAM, None)
         self.label_rect = self.text.get_rect(center = 
                                              (self.pos[0],
                                               self.slider_top_pos - 15))
@@ -194,8 +196,8 @@ class Slider:
         self.hovered = True
 
     def render(self, screen):
-        pg.draw.rect(screen, RED, self.container_rect)
-        pg.draw.rect(screen, CREAM, self.button_rect)
+        pg.draw.rect(screen, const.RED, self.container_rect)
+        pg.draw.rect(screen, const.CREAM, self.button_rect)
 
     def get_value(self):
         val_range = self.slider_right_pos - self.slider_left_pos - 1
@@ -206,7 +208,7 @@ class Slider:
     
     def display_value(self, screen):
         self.text = self.font.render('volume: ' + str(int(self.get_value())), 
-                                     True, CREAM, None)
+                                     True, const.CREAM, None)
         screen.blit(self.text, self.label_rect)
 
     def check(self, screen):
@@ -230,209 +232,219 @@ class Slider:
 
 
 class Buttons_placement():
-    def __init__(self, width=WIDTH, height=HEIGHT, 
-                 text_font=DEFAULT_FONT_SIZE):
-        settings_button_width = width/SCREEN_PART_FOR_SETTINGS_BUTTON
-        settings_button_height = height/SCREEN_PART_FOR_SETTINGS_BUTTON 
-        button_width=width/SCREEN_PART_FOR_BUTTON
-        button_height=height/SCREEN_PART_FOR_BUTTON
-        button_space = button_height
-        center_x = (width/2 - button_width/2)
-        center_y = (height/2 - button_height/2)
+    def __init__(self, font, width=const.WIDTH, height=const.HEIGHT):
+        self.settings_button_width \
+            = width/const.WIDTH * const.SETTINGS_BUTTON_WIDTH
+        self.settings_button_height \
+            = height/const.HEIGHT * const.SETTINGS_BUTTON_HEIGHT 
+        self.button_width=width/const.WIDTH * const.BUTTON_WIDTH
+        self.button_height=height/const.HEIGHT * const.BUTTON_HEIGHT
+
+        button_space = self.button_height
+        center_x = (width/2 - self.button_width/2)
+        center_y = (height/2 - self.button_height/2)
         settings_button_x = 3*width/5
         settings_button_y = height/3 
+
+        self.font = font
         self.dict = {
-            'start':Button(center_x, center_y, button_width, 
-                           button_height, 'Play',
+            'start':Button(center_x, center_y, self.button_width, 
+                           self.button_height, 'Play',
                            menu_features['button_inactive'],
-                           text_font, 
+                           self.font, 
                            menu_features['button_active'], 
                            menu_features['button_click_sound']),
             'settings':Button(center_x, center_y + button_space, 
-                              button_width, button_height, 
+                              self.button_width, self.button_height, 
                               'Settings', menu_features['button_inactive'], 
-                              text_font,
+                              self.font,
                               menu_features['button_active'], 
                               menu_features['button_click_sound']),
             'scores':Button(center_x, center_y + button_space*2, 
-                            button_width, button_height, 
-                            'High_scores', menu_features['button_inactive'],
-                            text_font,  
+                            self.button_width, self.button_height, 
+                            'Scores', menu_features['button_inactive'],
+                            self.font,  
                             menu_features['button_active'], 
                             menu_features['button_click_sound']),
             'quit':Button(center_x, center_y + button_space*3, 
-                          button_width, button_height, 'Quit', 
+                          self.button_width, self.button_height, 'Quit', 
                           menu_features['button_inactive'],
-                          text_font, 
+                          self.font, 
                           menu_features['button_active'], 
                           menu_features['button_click_sound']),
-            'back':Button(button_width,  height - button_height*2, 
-                          button_width, button_height, 'Back',
+            'back':Button(self.button_width,  height - self.button_height*2, 
+                          self.button_width, self.button_height, 'Back',
                           menu_features['button_inactive'], 
-                          text_font, menu_features['button_active'], 
+                          self.font, menu_features['button_active'], 
                           menu_features['button_click_sound']),
-            'resume':Button(center_x , center_y, button_width, 
-                            button_height, 'Resume',
+            'resume':Button(center_x , center_y, self.button_width, 
+                            self.button_height, 'Resume',
                             menu_features['button_inactive'], 
-                            text_font, menu_features['button_active'], 
+                            self.font, menu_features['button_active'], 
                             menu_features['button_click_sound']),
             'main_menu':Button(center_x, center_y + button_space, 
-                               button_width, button_height, 
+                               self.button_width, self.button_height, 
                                'Main Menu', menu_features['button_inactive'], 
-                               text_font, menu_features['button_active'], 
+                               self.font, menu_features['button_active'], 
                                menu_features['button_click_sound']),
             'retry':Button(center_x, center_y + button_space, 
-                           button_width, button_height, 'Retry',
+                           self.button_width, self.button_height, 'Retry',
                            menu_features['button_inactive'],
-                           text_font, menu_features['button_active'], 
+                           self.font, menu_features['button_active'], 
                            menu_features['button_click_sound']),
             'quit_from_game_over':Button(center_x, 
                                          center_y + button_space*2, 
-                                         button_width, button_height, 
+                                         self.button_width, self.button_height, 
                                          'Main Menu', 
                                          menu_features['button_inactive'], 
-                                         text_font, 
+                                         self.font, 
                                          menu_features['button_active'], 
                                          menu_features['button_click_sound']),
-            '1 player':Button(center_x - button_width, center_y, 
-                              button_width, button_height, 
+            '1 player':Button(center_x - self.button_width, center_y, 
+                              self.button_width, self.button_height, 
                               '1 player', menu_features['button_inactive'], 
-                              text_font, menu_features['button_active'], 
+                              self.font, menu_features['button_active'], 
                               menu_features['button_click_sound']),
-            '2 players':Button(center_x + button_width, center_y, 
-                               button_width, button_height, 
+            '2 players':Button(center_x + self.button_width, center_y, 
+                               self.button_width, self.button_height, 
                                '2 players', menu_features['button_inactive'], 
-                               text_font, menu_features['button_active'], 
+                               self.font, menu_features['button_active'], 
                                menu_features['button_click_sound']),
-            'Yes':Button(center_x - button_width, center_y, button_width, 
-                         button_height, 'Yes', 
-                         menu_features['button_inactive'], text_font, 
+            'Yes':Button(center_x - self.button_width, center_y, self.button_width, 
+                         self.button_height, 'Yes', 
+                         menu_features['button_inactive'], self.font, 
                          menu_features['button_active'], 
                          menu_features['button_click_sound']),
-            'No':Button(center_x + button_width, center_y, button_width, 
-                        button_height, 'No', menu_features['button_inactive'], 
-                        text_font, menu_features['button_active'], 
+            'No':Button(center_x + self.button_width, center_y, self.button_width, 
+                        self.button_height, 'No', menu_features['button_inactive'], 
+                        self.font, menu_features['button_active'], 
                         menu_features['button_click_sound']),
             'shoot_p1':Controls_button((settings_button_x
-                                        - settings_button_width/2), 
+                                        - self.settings_button_width), 
                                        settings_button_y, 
-                                       settings_button_width, 
-                                       settings_button_height, 'space', 
-                                       DEFAULT_PLAYER_ONE_SHOOT_BUTTON, 
+                                       self.settings_button_width, 
+                                       self.settings_button_height, 'space', 
+                                       const.DEFAULT_PLAYER_ONE_SHOOT_BUTTON, 
                                        'shoot_p1', 
                                        menu_features['button_inactive'], 
-                                       text_font, 
+                                       self.font, 
                                        menu_features['button_active'], 
                                        menu_features['button_click_sound']),
             'up_p1':Controls_button((settings_button_x
-                                    - settings_button_width/2), 
+                                    - self.settings_button_width), 
                                     (settings_button_y
-                                    + settings_button_height), 
-                                    settings_button_width, 
-                                    settings_button_height, 
-                                    'w', DEFAULT_PLAYER_ONE_UP_BUTTON, 
+                                    + self.settings_button_height), 
+                                    self.settings_button_width, 
+                                    self.settings_button_height, 
+                                    'w', const.DEFAULT_PLAYER_ONE_UP_BUTTON, 
                                     'up_p1', 
                                     menu_features['button_inactive'], 
-                                    text_font,
+                                    self.font,
                                     menu_features['button_active'], 
                                     menu_features['button_click_sound']),
             'down_p1':Controls_button((settings_button_x
-                                      - settings_button_width/2), 
+                                      - self.settings_button_width), 
                                       (settings_button_y 
-                                      + 2*settings_button_height), 
-                                      settings_button_width, 
-                                      settings_button_height, 
-                                      's', DEFAULT_PLAYER_ONE_DOWN_BUTTON, 
+                                      + 2*self.settings_button_height), 
+                                      self.settings_button_width, 
+                                      self.settings_button_height, 
+                                      's', 
+                                      const.DEFAULT_PLAYER_ONE_DOWN_BUTTON, 
                                       'down_p1', 
                                       menu_features['button_inactive'],
-                                      text_font, 
+                                      self.font, 
                                       menu_features['button_active'], 
                                       menu_features['button_click_sound']),
             'right_p1':Controls_button((settings_button_x 
-                                       - settings_button_width/2), 
+                                       - self.settings_button_width), 
                                        (settings_button_y
-                                       + 3*settings_button_height), 
-                                       settings_button_width, 
-                                       settings_button_height, 
-                                       'd', DEFAULT_PLAYER_ONE_RIGHT_BUTTON, 
+                                       + 3*self.settings_button_height), 
+                                       self.settings_button_width, 
+                                       self.settings_button_height, 
+                                       'd', 
+                                       const.DEFAULT_PLAYER_ONE_RIGHT_BUTTON, 
                                        'right_p1', 
                                        menu_features['button_inactive'], 
-                                       text_font,
+                                       self.font,
                                        menu_features['button_active'], 
                                        menu_features['button_click_sound']),
             'left_p1':Controls_button((settings_button_x
-                                      - settings_button_width/2), 
+                                      - self.settings_button_width), 
                                       (settings_button_y
-                                      + 4*settings_button_height), 
-                                      settings_button_width, 
-                                      settings_button_height, 
-                                      'a', DEFAULT_PLAYER_ONE_LEFT_BUTTON, 
+                                      + 4*self.settings_button_height), 
+                                      self.settings_button_width, 
+                                      self.settings_button_height, 
+                                      'a', 
+                                      const.DEFAULT_PLAYER_ONE_LEFT_BUTTON, 
                                       'left_p1', 
                                       menu_features['button_inactive'], 
-                                      text_font,
+                                      self.font, 
                                       menu_features['button_active'], 
                                       menu_features['button_click_sound']),
             'shoot_p2':Controls_button((settings_button_x
-                                       + settings_button_width/2), 
+                                       + self.settings_button_width), 
                                        settings_button_y, 
-                                       settings_button_width, 
-                                       settings_button_height, 'rctrl', 
-                                       DEFAULT_PLAYER_TWO_SHOOT_BUTTON, 
+                                       self.settings_button_width, 
+                                       self.settings_button_height, 'rctrl', 
+                                       const.DEFAULT_PLAYER_TWO_SHOOT_BUTTON, 
                                        'shoot_p2', 
                                        menu_features['button_inactive'],
-                                       text_font, 
+                                       self.font, 
                                        menu_features['button_active'], 
                                        menu_features['button_click_sound']),
             'up_p2':Controls_button((settings_button_x 
-                                    + settings_button_width/2), 
+                                    + self.settings_button_width), 
                                     (settings_button_y 
-                                    + settings_button_height), 
-                                    settings_button_width, 
-                                    settings_button_height, 
-                                    'up', DEFAULT_PLAYER_TWO_UP_BUTTON, 
+                                    + self.settings_button_height), 
+                                    self.settings_button_width, 
+                                    self.settings_button_height, 
+                                    'up', const.DEFAULT_PLAYER_TWO_UP_BUTTON, 
                                     'up_p2', menu_features['button_inactive'], 
-                                    text_font, 
+                                    self.font, 
                                     menu_features['button_active'], 
                                     menu_features['button_click_sound']),
             'down_p2':Controls_button((settings_button_x
-                                      + settings_button_width/2), 
+                                      + self.settings_button_width), 
                                       (settings_button_y
-                                      + 2*settings_button_height), 
-                                      settings_button_width, 
-                                      settings_button_height, 
-                                      'down', DEFAULT_PLAYER_TWO_DOWN_BUTTON, 
+                                      + 2*self.settings_button_height), 
+                                      self.settings_button_width, 
+                                      self.settings_button_height, 
+                                      'down', 
+                                      const.DEFAULT_PLAYER_TWO_DOWN_BUTTON, 
                                       'down_p2', 
                                       menu_features['button_inactive'],
-                                      text_font, 
+                                      self.font, 
                                       menu_features['button_active'], 
                                       menu_features['button_click_sound']),
             'right_p2':Controls_button((settings_button_x
-                                       + settings_button_width/2), 
+                                       + self.settings_button_width), 
                                        (settings_button_y
-                                       + 3*settings_button_height), 
-                                       settings_button_width, 
-                                       settings_button_height, 
+                                       + 3*self.settings_button_height), 
+                                       self.settings_button_width, 
+                                       self.settings_button_height, 
                                        'right', 
-                                       DEFAULT_PLAYER_TWO_RIGHT_BUTTON, 
+                                       const.DEFAULT_PLAYER_TWO_RIGHT_BUTTON, 
                                        'right_p2', 
                                        menu_features['button_inactive'], 
-                                       text_font,
+                                       self.font, 
                                        menu_features['button_active'], 
                                        menu_features['button_click_sound']),
             'left_p2':Controls_button((settings_button_x
-                                      + settings_button_width/2), 
+                                      + self.settings_button_width), 
                                       (settings_button_y 
-                                      + 4*settings_button_height), 
-                                      settings_button_width, 
-                                      settings_button_height, 
-                                      'left', DEFAULT_PLAYER_TWO_LEFT_BUTTON, 
+                                      + 4*self.settings_button_height), 
+                                      self.settings_button_width, 
+                                      self.settings_button_height, 
+                                      'left', 
+                                      const.DEFAULT_PLAYER_TWO_LEFT_BUTTON, 
                                       'left_p2',
                                       menu_features['button_inactive'], 
-                                      text_font, 
+                                      self.font, 
                                       menu_features['button_active'], 
                                       menu_features['button_click_sound']),
         }
 
+default_font = './fonts/QuinqueFive.ttf'
 
 screen_resolution = {
     '400 x 300': (400, 300),

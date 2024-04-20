@@ -1,42 +1,48 @@
 from enum import IntEnum
 from math import pow
 import pygame as pg
-from constants import *
-
+import constants as const
 
 class Sprite_features():
-    def __init__(self, sprite_features, screen_width=WIDTH, 
-                 screen_height=HEIGHT, is_player=False):
+    def __init__(self, sprite_features, screen_width=const.WIDTH, 
+                 screen_height=const.HEIGHT, is_player=False):
         self.forward \
             = pg.image.load(sprite_features['forward']).convert_alpha()
-        new_mob_size = (tuple(i*j for i, j in zip(self.forward.get_size(),
-                                                  (screen_width/WIDTH, 
-                                                   screen_height/HEIGHT))))
+        
+        new_mob_size = (tuple(i*j for i, j in \
+                               zip(self.forward.get_size(),
+                                   (screen_width/const.WIDTH, 
+                                    screen_height/const.HEIGHT))))
 
         self.forward = pg.transform.scale(self.forward, new_mob_size)
         self.right = pg.transform.rotate(self.forward, -20)
         self.left = pg.transform.rotate(self.forward, 20)
-        self.back = pg.transform.scale( \
-            pg.image.load(sprite_features['back']).convert_alpha(), 
-            new_mob_size)
+        self.back \
+            = pg.transform.scale( \
+                pg.image.load(sprite_features['back']).convert_alpha(), 
+                new_mob_size)
 
         self.bullet \
-              = pg.image.load(sprite_features['bullet']).convert_alpha()
-        self.bullet = pg.transform.scale(self.bullet, 
-                                         tuple(i*j for i,j in 
-                                               zip(self.bullet.get_size(),
-                                                   (screen_width/WIDTH, 
-                                                    screen_height/HEIGHT))))
+            = pg.image.load(sprite_features['bullet']).convert_alpha()
+        self.bullet \
+            = pg.transform.scale(self.bullet, 
+                                 tuple(i*j for i,j in \
+                                 zip(self.bullet.get_size(),
+                                 (screen_width/const.WIDTH, 
+                                 screen_height/const.HEIGHT))))
 
         self.shoot_sound = pg.mixer.Sound(sprite_features['shoot_sound'])
         self.dead_sound = pg.mixer.Sound(sprite_features['dead_sound'])
         self.hurt_sound = pg.mixer.Sound(sprite_features['hurt_sound'])
 
-        self.mov_speed = sprite_features['speed'] \
-                        *pow((screen_height*screen_width)/(WIDTH*HEIGHT), 0.5)
-        self.bullet_speed = sprite_features['bullet_speed'] \
-                            *pow((screen_height*screen_width)/(WIDTH*HEIGHT), 
-                                 0.5)
+        self.mov_speed \
+            = sprite_features['speed'] \
+              *pow((screen_height*screen_width)/(const.WIDTH*const.HEIGHT), 
+                   0.5)
+        self.bullet_speed \
+            = sprite_features['bullet_speed'] \
+              *pow((screen_height*screen_width)/(const.WIDTH*const.HEIGHT), 
+                   0.5)
         self.health = sprite_features['health']
         if is_player:
             self.disappear = pg.transform.scale( \
@@ -75,9 +81,9 @@ mob_features = {
     'shoot_sound':'./sounds/mob_shoot_sound.wav',    
     'dead_sound':'./sounds/mob_dead_sound.wav',   
     'hurt_sound':'./sounds/mob_hurt_sound.wav',     
-    'health':DEFAULT_MOB_HEALTH,
-    'speed':DEFAULT_MOB_MOV_SPEED,
-    'bullet_speed':DEFAULT_MOB_BULLET_MOV_SPEED
+    'health':const.DEFAULT_MOB_HEALTH,
+    'speed':const.DEFAULT_MOB_MOV_SPEED,
+    'bullet_speed':const.DEFAULT_MOB_BULLET_MOV_SPEED
 }
 
 player_one_features = {
@@ -88,14 +94,14 @@ player_one_features = {
     'shoot_sound':'./sounds/player_shoot_sound.wav',    
     'dead_sound':'./sounds/player_dead_sound.wav',    
     'hurt_sound':'./sounds/player_hurt_sound.wav',    
-    'health':DEFAULT_PLAYER_HEALTH,
-    'speed':DEFAULT_PLAYER_MOV_SPEED,
-    'bullet_speed':DEFAULT_PLAYER_BULLET_MOV_SPEED,
-    'forward_button':DEFAULT_PLAYER_ONE_UP_BUTTON,
-    'right_button':DEFAULT_PLAYER_ONE_RIGHT_BUTTON,
-    'left_button':DEFAULT_PLAYER_ONE_LEFT_BUTTON,
-    'back_button':DEFAULT_PLAYER_ONE_DOWN_BUTTON,
-    'shoot_button':DEFAULT_PLAYER_ONE_SHOOT_BUTTON
+    'health':const.DEFAULT_PLAYER_HEALTH,
+    'speed':const.DEFAULT_PLAYER_MOV_SPEED,
+    'bullet_speed':const.DEFAULT_PLAYER_BULLET_MOV_SPEED,
+    'forward_button':const.DEFAULT_PLAYER_ONE_UP_BUTTON,
+    'right_button':const.DEFAULT_PLAYER_ONE_RIGHT_BUTTON,
+    'left_button':const.DEFAULT_PLAYER_ONE_LEFT_BUTTON,
+    'back_button':const.DEFAULT_PLAYER_ONE_DOWN_BUTTON,
+    'shoot_button':const.DEFAULT_PLAYER_ONE_SHOOT_BUTTON
 }
 
 player_two_features = {
@@ -106,20 +112,22 @@ player_two_features = {
     'shoot_sound':'./sounds/player_shoot_sound.wav',    
     'dead_sound':'./sounds/player_dead_sound.wav',    
     'hurt_sound':'./sounds/player_hurt_sound.wav',    
-    'health':DEFAULT_PLAYER_HEALTH,
-    'speed':DEFAULT_PLAYER_MOV_SPEED,
-    'bullet_speed':DEFAULT_PLAYER_BULLET_MOV_SPEED,
-    'forward_button':DEFAULT_PLAYER_TWO_UP_BUTTON,
-    'right_button':DEFAULT_PLAYER_TWO_RIGHT_BUTTON,
-    'left_button':DEFAULT_PLAYER_TWO_LEFT_BUTTON,
-    'back_button':DEFAULT_PLAYER_TWO_DOWN_BUTTON,
-    'shoot_button':DEFAULT_PLAYER_TWO_SHOOT_BUTTON
+    'health':const.DEFAULT_PLAYER_HEALTH,
+    'speed':const.DEFAULT_PLAYER_MOV_SPEED,
+    'bullet_speed':const.DEFAULT_PLAYER_BULLET_MOV_SPEED,
+    'forward_button':const.DEFAULT_PLAYER_TWO_UP_BUTTON,
+    'right_button':const.DEFAULT_PLAYER_TWO_RIGHT_BUTTON,
+    'left_button':const.DEFAULT_PLAYER_TWO_LEFT_BUTTON,
+    'back_button':const.DEFAULT_PLAYER_TWO_DOWN_BUTTON,
+    'shoot_button':const.DEFAULT_PLAYER_TWO_SHOOT_BUTTON
 }
 
 bonus_textures = {
     'heal_bonus':['./images/heal_bonus.png'],
     'bullet_bonus':['./images/power_up/1.png', 
-                    './images/power_up/2.png']
+                    './images/power_up/2.png'],
+    'delay_bonus':['./images/power_up/3.png',
+                   './images/power_up/4.png']
 }
 
 bonus_sound = './sounds/bonus_sound.mp3'

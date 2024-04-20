@@ -1,7 +1,7 @@
 import sys
 from math import ceil
 import pygame as pg
-from constants import *
+import constants as const
 from sprite_utilities import player_one_features, \
                              player_two_features, \
                              mob_features, cursor_features
@@ -10,8 +10,8 @@ from sprites import Player, Mob, Button, Cursor, all_sprites, mobs
 
 
 class Game_process:
-    def __init__(self, game_name='MyGame', width=WIDTH, height=HEIGHT, 
-                 font_size=DEFAULT_FONT_SIZE):
+    def __init__(self, game_name='MyGame', width=const.WIDTH, 
+                 height=const.HEIGHT, font_size=const.DEFAULT_FONT_SIZE):
         #Переменные, меняющиеся в процессе игры
         self.volume = 100
         
@@ -29,8 +29,8 @@ class Game_process:
         self.width = width
         self.height = height
         self.font_size = font_size
-        self.font = pg.font.Font(None, self.font_size)
-        self.buttons = mu.Buttons_placement(self.width, 
+        self.font = pg.font.Font(mu.default_font, self.font_size)
+        self.buttons = mu.Buttons_placement(self.font, self.width, 
                                             self.height) 
         pg.display.set_caption(f"{game_name}")
         self.screen = pg.display.set_mode((self.width, self.height))
@@ -38,27 +38,32 @@ class Game_process:
         self.cursor = Cursor(cursor_features['cursor_inactive'], 
                              cursor_features['cursor_active'],
                              cursor_features['cursor_click_sound'])
-        self.dropdown = mu.DropDown([RED, LIGHT_RED], [RED, LIGHT_RED], 
-                                    int(self.width*DROPDOWN_X_COEF), 
-                                    int(self.height*DROPDOWN_Y_COEF), 
-                                    int(DROPDOWN_WIDTH*self.width/WIDTH), 
-                                    int(DROPDOWN_HEIGHT*self.height/HEIGHT), 
-                                    self.font, 'screen resolution', 
-                                    mu.screen_resolution.keys())
-        self.slider = mu.Slider((SLIDER_X_COEF*self.width, 
-                                 SLIDER_Y_COEF*self.height),
-                                (int(SLIDER_WIDTH*self.width/WIDTH), 
-                                 int(SLIDER_HEIGHT*self.height/HEIGHT)), 
-                                pg.mixer.music.get_volume(), 0, 100, 
-                                self.font)
+        self.dropdown \
+              = mu.DropDown([const.RED, const.LIGHT_RED], 
+                            [const.RED, const.LIGHT_RED], 
+                            int(self.width*const.DROPDOWN_X_COEF), 
+                            int(self.height*const.DROPDOWN_Y_COEF), 
+                            int(const.DROPDOWN_WIDTH \
+                                *self.width/const.WIDTH), 
+                            int(const.DROPDOWN_HEIGHT \
+                                *self.height/const.HEIGHT), 
+                            self.font, 'screen resolution', 
+                            mu.screen_resolution.keys())
+        self.slider \
+            = mu.Slider((const.SLIDER_X_COEF*self.width, 
+                         const.SLIDER_Y_COEF*self.height),
+                        (int(const.SLIDER_WIDTH*self.width/const.WIDTH), 
+                         int(const.SLIDER_HEIGHT*self.height/const.HEIGHT)), 
+                        pg.mixer.music.get_volume(), 0, 100, self.font)
         
         self.state = self.main_menu
         mu.check_music(main_menu=True)
 
     def main_menu(self):
-        mu.set_background_image(self.screen, mu.menu_features['menu_background'], 
-                             self.width, self.height)
-        mu.print_text(self.screen, 'COSMO STAR', self.font, CREAM, 
+        mu.set_background_image(self.screen, 
+                                mu.menu_features['menu_background'], 
+                                self.width, self.height)
+        mu.print_text(self.screen, 'COSMO STAR', self.font, const.CREAM, 
                    self.width/2, self.height/4)        
 
         buttons = [self.buttons.dict['start'], self.buttons.dict['settings'],
@@ -96,41 +101,41 @@ class Game_process:
         mu.set_background_image(self.screen, 
                              mu.menu_features['settings_background'], 
                              self.width, self.height)
-        mu.print_text(self.screen, 'Player 1', self.font, CREAM, 
+        mu.print_text(self.screen, 'Player 1', self.font, const.CREAM, 
                    self.buttons.dict['shoot_p1'].x 
-                   + self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
+                   + self.buttons.settings_button_width/2, 
                    self.buttons.dict['shoot_p1'].y 
-                   - self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Player 2', self.font, CREAM, 
+                   - self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Player 2', self.font, const.CREAM, 
                    self.buttons.dict['shoot_p2'].x 
-                   + self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
+                   + self.buttons.settings_button_width/2, 
                    self.buttons.dict['shoot_p2'].y 
-                   - self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Shoot', self.font, CREAM, 
-                   self.buttons.dict['shoot_p1'].x 
-                   + 3*self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
-                   self.buttons.dict['shoot_p1'].y 
-                   + self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Up', self.font, CREAM, 
-                   self.buttons.dict['shoot_p1'].x 
-                   + 3*self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
-                   self.buttons.dict['shoot_p1'].y 
-                   + 3*self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Down', self.font, CREAM, 
-                   self.buttons.dict['shoot_p1'].x 
-                   + 3*self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
-                   self.buttons.dict['shoot_p1'].y 
-                   + 5*self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Right', self.font, CREAM, 
-                   self.buttons.dict['shoot_p1'].x 
-                   + 3*self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
-                   self.buttons.dict['shoot_p1'].y 
-                   + 7*self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
-        mu.print_text(self.screen, 'Left', self.font, CREAM, 
-                   self.buttons.dict['shoot_p1'].x 
-                   + 3*self.width/(2*SCREEN_PART_FOR_SETTINGS_BUTTON), 
-                   self.buttons.dict['shoot_p1'].y 
-                   + 9*self.height/(2*SCREEN_PART_FOR_SETTINGS_BUTTON))
+                   - self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Shoot', self.font, const.CREAM, 
+                   self.buttons.dict['shoot_p2'].x 
+                   + 3*self.buttons.settings_button_width/2, 
+                   self.buttons.dict['shoot_p2'].y 
+                   + self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Up', self.font, const.CREAM, 
+                   self.buttons.dict['shoot_p2'].x 
+                   + 3*self.buttons.settings_button_width/2, 
+                   self.buttons.dict['shoot_p2'].y 
+                   + 3*self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Down', self.font, const.CREAM, 
+                   self.buttons.dict['shoot_p2'].x 
+                   + 3*self.buttons.settings_button_width/2, 
+                   self.buttons.dict['shoot_p2'].y 
+                   + 5*self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Right', self.font, const.CREAM, 
+                   self.buttons.dict['shoot_p2'].x 
+                   + 3*self.buttons.settings_button_width/2, 
+                   self.buttons.dict['shoot_p2'].y 
+                   + 7*self.buttons.settings_button_height/2)
+        mu.print_text(self.screen, 'Left', self.font, const.CREAM, 
+                   self.buttons.dict['shoot_p2'].x 
+                   + 3*self.buttons.settings_button_width/2, 
+                   self.buttons.dict['shoot_p2'].y 
+                   + 9*self.buttons.settings_button_height/2)
         events = pg.event.get()
         for event in events:
             mu.check_default_events(event, self.cursor, self.volume, buttons)
@@ -155,27 +160,30 @@ class Game_process:
                and (value[0] != self.width or value[1] != self.height)):
                 self.font_size = int((value[0]*value[1])/ \
                                      (self.width*self.height)*self.font_size)
-                self.font = pg.font.Font(None, self.font_size)
+                self.font = pg.font.Font(mu.default_font, self.font_size)
                 self.width = value[0] 
                 self.height = value[1]
                 self.screen = pg.display.set_mode((self.width, self.height))
 
-                self.buttons = mu.Buttons_placement(self.width, self.height, 
-                                                    self.font_size)
+                self.buttons = mu.Buttons_placement(self.font, 
+                                                    self.width, self.height)
                 
                 self.dropdown.font = self.font
                 self.dropdown.rect.width \
-                    = int(DROPDOWN_WIDTH*self.width/WIDTH) 
+                    = int(const.DROPDOWN_WIDTH*self.width/const.WIDTH) 
                 self.dropdown.rect.height \
-                    = int(DROPDOWN_HEIGHT*self.height/HEIGHT)
-                self.dropdown.rect.center = (int(self.width*DROPDOWN_X_COEF), 
-                                             int(self.height*DROPDOWN_Y_COEF))
+                    = int(const.DROPDOWN_HEIGHT*self.height/const.HEIGHT)
+                self.dropdown.rect.center \
+                    = (int(self.width*const.DROPDOWN_X_COEF), 
+                       int(self.height*const.DROPDOWN_Y_COEF))
                  
                 self.slider \
-                    = mu.Slider((self.width*SLIDER_X_COEF, 
-                                 self.height*SLIDER_Y_COEF),
-                                (int(SLIDER_WIDTH*self.width/WIDTH), 
-                                 int(SLIDER_HEIGHT*self.height/HEIGHT)), 
+                    = mu.Slider((self.width*const.SLIDER_X_COEF, 
+                                 self.height*const.SLIDER_Y_COEF),
+                                (int(const.SLIDER_WIDTH \
+                                     *self.width/const.WIDTH), 
+                                 int(const.SLIDER_HEIGHT \
+                                     *self.height/const.HEIGHT)), 
                                 pg.mixer.music.get_volume(), 
                                 0, 100, self.font)
         Button.list_check_hover(buttons, self.screen)
@@ -235,10 +243,9 @@ class Game_process:
             self.high_scores_is_open = True
         else:
             for item, i in zip(self.scores, range(10)):
-                mu.print_text(self.screen, item[:-1], self.font, CREAM, 
-                           self.width/2, 
-                           self.height/4 \
-                           + i*self.height/((2*SCREEN_PART_FOR_BUTTON)))
+                mu.print_text(self.screen, item[:-1], self.font, 
+                              const.CREAM, self.width/2, 
+                              self.height/4 + i*const.BUTTON_HEIGHT/2)
                 
             buttons = [self.buttons.dict['back']]
         
@@ -255,7 +262,8 @@ class Game_process:
         mu.set_background_image(self.screen, 
                              mu.menu_features['pause_background'], 
                              self.width, self.height)
-        mu.print_text(self.screen, 'Pause', self.font, CREAM, WIDTH/2, HEIGHT/4)
+        mu.print_text(self.screen, 'Pause', self.font, 
+                      const.CREAM, const.WIDTH/2, const.HEIGHT/4)
 
         buttons = [self.buttons.dict['resume'], 
                    self.buttons.dict['main_menu']]
@@ -278,16 +286,18 @@ class Game_process:
 
     def game_over(self):
         mu.set_background_image(self.screen, 
-                             mu.menu_features['game_over_background'], 
-                             self.width, self.height)
+                                mu.menu_features['game_over_background'], 
+                                self.width, self.height)
 
-        mu.print_text(self.screen, 'GAME OVER', self.font, RED, 
-                   self.width/2, self.height/5)
-        mu.print_text(self.screen, f'Your score {self.score}', self.font, RED, 
-                   self.width/2, self.height*4/15)
+        mu.print_text(self.screen, 'GAME OVER', self.font, 
+                      const.RED, self.width/2, self.height/5)
+        mu.print_text(self.screen, f'Your score {self.score}', self.font, 
+                      const.RED, self.width/2, self.height*4/15)
+        
         if not self.high_scores_is_open:
             self.scores = mu.get_high_scores_data(self.scores_file)
             self.record_pos = -1
+
             for num,score in zip(range(10),
                                  list(self.scores[j].rsplit(' ', 1)[1] \
                                       for j in range(len(self.scores)-1))):
@@ -297,11 +307,13 @@ class Game_process:
             if self.record_pos == -1 and len(self.scores) < 11:
                 self.record_pos = len(self.scores) - 1
 
-            self.textbox = mu.TextBox(self.width*TEXTBOX_X_COEF, 
-                                      self.height*TEXTBOX_Y_COEF, 
-                                      self.width/WIDTH*TEXTBOX_WIDTH, 
-                                      self.height/HEIGHT*TEXTBOX_HEIGHT, 
-                                      RED, LIGHT_RED, self.font, 'Nickname')        
+            self.textbox \
+                = mu.TextBox(self.width*const.TEXTBOX_X_COEF, 
+                             self.height*const.TEXTBOX_Y_COEF, 
+                             self.width/const.WIDTH*const.TEXTBOX_WIDTH, 
+                             self.height/const.HEIGHT*const.TEXTBOX_HEIGHT, 
+                             const.RED, const.LIGHT_RED, 
+                             self.font, 'Nickname')        
             self.high_scores_is_open = True
 
         buttons = [self.buttons.dict['retry'], 
@@ -321,8 +333,9 @@ class Game_process:
                     self.is_new_game = True
 
         if self.record_pos != -1 and not self.new_record_str:
-            mu.print_text(self.screen, 'You are in the top ten on the scorecard', 
-                       self.font, RED, self.width/2, self.height/3)
+            mu.print_text(self.screen, 
+                          'You are in the top ten on the scorecard', 
+                          self.font, const.RED, self.width/2, self.height/3)
             self.textbox.update()
             self.textbox.draw(self.screen)
 
@@ -332,19 +345,19 @@ class Game_process:
         if self.state != self.game_over:
             if self.record_pos != -1:
                 mu.set_high_scores_data(self.scores_file, self.score, 
-                                     self.scores, self.record_pos, 
-                                     self.new_record_str)
+                                        self.scores, self.record_pos, 
+                                        self.new_record_str)
             self.new_record_str = None
             self.high_scores_is_open = False
 
     def choose_player_num(self):
         mu.set_background_image(self.screen, 
-                             mu.menu_features['menu_background'], 
-                             self.width, self.height)
+                                mu.menu_features['menu_background'], 
+                                self.width, self.height)
 
 
-        mu.print_text(self.screen, 'Choose game mode', self.font, CREAM, 
-                   self.width/2, self.height/4)    
+        mu.print_text(self.screen, 'Choose game mode', self.font, 
+                      const.CREAM, self.width/2, self.height/4)    
 
         buttons = [self.buttons.dict['1 player'], 
                    self.buttons.dict['2 players'], 
@@ -369,33 +382,36 @@ class Game_process:
 
     def game_interface(self):
         mu.set_background_image(self.screen, 
-                             mu.menu_features['menu_background'], 
-                             self.width, self.height)
+                                mu.menu_features['menu_background'], 
+                                self.width, self.height)
         mu.print_text(self.screen, f'Score:{self.score} Wave:{self.wave_num}', 
-                   self.font, CREAM, self.width/8, self.height/7)
+                      self.font, const.CREAM, self.width/8, self.height/7)
         
         all_sprites.draw(self.screen)
 
         player_one_health_image = pg.image.load(
             mu.health_bar[ceil(self.player_one.features.health \
-                            /(DEFAULT_PLAYER_HEALTH/10))])
+                               /(const.DEFAULT_PLAYER_HEALTH/10))])
         player_one_health_image = \
             pg.transform.scale(player_one_health_image, 
                                tuple(i*j for i,j in zip( \
-                                   player_one_health_image.get_size(), 
-                                   (self.width/WIDTH, self.height/HEIGHT))))
+                                     player_one_health_image.get_size(), 
+                                     (self.width/const.WIDTH, 
+                                      self.height/const.HEIGHT))))
+        
         self.screen.blit(player_one_health_image, 
-                         (self.width*HEALTH_BAR_COEF, 
-                          self.height*HEALTH_BAR_COEF))
+                         (self.width*const.HEALTH_BAR_COEF, 
+                          self.height*const.HEALTH_BAR_COEF))
+        
         if self.is_two_players:
             player_two_health_image = \
                   pg.transform.scale(pg.image.load(mu.health_bar[ceil( \
                       self.player_two.features.health \
-                      /(DEFAULT_PLAYER_HEALTH/10))]), 
+                      /(const.DEFAULT_PLAYER_HEALTH/10))]), 
                       player_one_health_image.get_size())
             self.screen.blit(player_two_health_image, 
-                             (self.width*(1-5*HEALTH_BAR_COEF), 
-                              self.height*HEALTH_BAR_COEF))       
+                             (self.width*(1-5*const.HEALTH_BAR_COEF), 
+                              self.height*const.HEALTH_BAR_COEF))       
 
     def new_wave(self):
         if self.is_new_wave:
@@ -404,7 +420,8 @@ class Game_process:
             self.remain_mobs = self.wave_num*2
 
         mobs_num = self.remain_mobs \
-            if self.remain_mobs < DEFAULT_MAX_MOB_NUM else DEFAULT_MAX_MOB_NUM
+            if self.remain_mobs < const.DEFAULT_MAX_MOB_NUM \
+                else const.DEFAULT_MAX_MOB_NUM
         
         Mob.spawnMobs(mobs_num, mob_features, self.width, 
                       self.height, self.volume)
@@ -443,7 +460,7 @@ class Game_process:
         mobs_num = len(mobs)
         all_sprites.update()
         if mobs_num > len(mobs):
-            self.score += (mobs_num - len(mobs))*DEFAULT_KILL_POINTS
+            self.score += (mobs_num - len(mobs)) * const.DEFAULT_KILL_POINTS
         
         self.game_interface()
 

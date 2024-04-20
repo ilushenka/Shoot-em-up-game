@@ -3,6 +3,7 @@ from menu import Game_process
 from constants import FPS
 
 pg.init() 
+pg.mixer.init() 
 
 def game_loop():
     running = True
