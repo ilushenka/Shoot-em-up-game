@@ -112,7 +112,7 @@ class DropDown():
 
     def draw(self, screen):
         pg.draw.rect(screen, self.color_menu[self.menu_active], self.rect, 0)
-        msg = self.font.render(self.main_str, 1, CREAM)
+        msg = self.font.render(self.main_str, 1, const.CREAM)
         screen.blit(msg, msg.get_rect(center = self.rect.center))
 
         if self.draw_menu:
@@ -123,7 +123,7 @@ class DropDown():
                              self.color_option\
                              [1 if text == self.active_option else 0], 
                              rect, 0)
-                msg = self.font.render(text, 1, CREAM)
+                msg = self.font.render(text, 1, const.CREAM)
                 screen.blit(msg, msg.get_rect(center = rect.center))
 
     def update(self, event_list):
