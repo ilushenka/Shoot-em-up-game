@@ -4,10 +4,10 @@ import pygame as pg
 import constants as const
 
 class Sprite_features():
+    _image_cache = {}
     def __init__(self, sprite_features, screen_width=const.WIDTH, 
                  screen_height=const.HEIGHT, is_player=False):
-        self.forward \
-            = pg.image.load(sprite_features['forward']).convert_alpha()
+        self.forward = Sprite_features._load_image(sprite_features['forward'])
         
         new_mob_size = (tuple(i*j for i, j in \
                                zip(self.forward.get_size(),
@@ -15,15 +15,13 @@ class Sprite_features():
                                     screen_height/const.HEIGHT))))
 
         self.forward = pg.transform.scale(self.forward, new_mob_size)
-        self.right = pg.transform.rotate(self.forward, -20)
-        self.left = pg.transform.rotate(self.forward, 20)
-        self.back \
-            = pg.transform.scale( \
-                pg.image.load(sprite_features['back']).convert_alpha(), 
-                new_mob_size)
+        self.right = pg.transform.rotate(self.forward, -const.ROTATION_ANGLE)
+        self.left = pg.transform.rotate(self.forward, const.ROTATION_ANGLE)
 
-        self.bullet \
-            = pg.image.load(sprite_features['bullet']).convert_alpha()
+        self.back = Sprite_features._load_image(sprite_features['back'])
+        self.back = pg.transform.scale(self.back, new_mob_size)
+
+        self.bullet = Sprite_features._load_image(sprite_features['bullet'])
         self.bullet \
             = pg.transform.scale(self.bullet, 
                                  tuple(i*j for i,j in \
@@ -46,7 +44,7 @@ class Sprite_features():
         self.health = sprite_features['health']
         if is_player:
             self.disappear = pg.transform.scale( \
-                pg.image.load(sprite_features['disappear']).convert_alpha(), 
+                Sprite_features._load_image(sprite_features['disappear']), 
                 new_mob_size)
             self.forward_button = sprite_features['forward_button']
             self.right_button = sprite_features['right_button']
@@ -55,6 +53,13 @@ class Sprite_features():
             self.shoot_button = sprite_features['shoot_button']
         else:
             self.bullet = pg.transform.rotate(self.bullet, 180)
+    
+    @staticmethod
+    def _load_image(path):
+        if path not in Sprite_features._image_cache:
+            img = pg.image.load(path).convert_alpha()
+            Sprite_features._image_cache[path] = img
+        return Sprite_features._image_cache[path]
 
 
 class ShootModes(IntEnum):

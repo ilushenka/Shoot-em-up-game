@@ -4,7 +4,6 @@ from math import cos, sin, radians
 import sprite_utilities as su
 import constants as const
 
-
 #создание группы спрайтов
 all_sprites = pg.sprite.Group() 
 #cоздание  группы мобов и их пуль
@@ -147,8 +146,7 @@ class Mob(pg.sprite.Sprite):
         super().__init__()
         
         self.features = su.Sprite_features(mob_features, screen_width, 
-                                             screen_height)
-    
+                                                screen_height)
         self.image = self.features.forward
 
         self.sound_volume = sound_volume
@@ -205,7 +203,7 @@ class Mob(pg.sprite.Sprite):
         mob_bullets.add(bullet)
 
     def set_trajectory(self):
-        stop_cord = randint(self.rect.height, self.screen_height/3)
+        stop_cord = randint(self.rect.height, self.screen_height//3)
         trajectory_list = [self.sin_trajectory,
                            lambda:self.arc_trajectory(1), 
                            lambda:self.arc_trajectory(-1), 
@@ -223,7 +221,7 @@ class Mob(pg.sprite.Sprite):
                 [randint(-2*self.rect.width, - self.rect.width), 
                 randint(self.screen_width + self.rect.width, 
                         self.screen_width + 2*self.rect.width)])
-            self.rect.y = randint(0, self.screen_height/2)
+            self.rect.y = randint(0, self.screen_height//2)
             self.speedx =  randint(int(self.features.mov_speed/2), 
                                    int(self.features.mov_speed))
         self.speedy = 2*cos(self.rect.x / self.trajectory_coef)
@@ -235,7 +233,7 @@ class Mob(pg.sprite.Sprite):
         if not self.trajectory_is_set:
             self.trajectory_is_set = True
             self.trajectory_coef = randint(50, 100)
-            self.rect.x = randint(self.screen_width/4, 3*self.screen_width/4)
+            self.rect.x = randint(self.screen_width//4, 3*self.screen_width//4)
             self.rect.y = - self.rect.height*2
             self.speedy = randint(int(self.features.mov_speed/2), 
                                   int(self.features.mov_speed))

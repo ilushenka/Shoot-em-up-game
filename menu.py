@@ -7,6 +7,7 @@ from sprite_utilities import player_one_features, \
                              mob_features, cursor_features
 import menu_utilities as mu
 from sprites import Player, Mob, Button, Cursor, all_sprites, mobs
+import threading
 
 
 class Game_process:
@@ -389,30 +390,27 @@ class Game_process:
         
         all_sprites.draw(self.screen)
 
-        player_one_health_image = pg.image.load(
-            mu.health_bar[ceil(self.player_one.features.health \
-                               /(const.DEFAULT_PLAYER_HEALTH/10))])
-        player_one_health_image = \
-            pg.transform.scale(player_one_health_image, 
-                               tuple(i*j for i,j in zip( \
-                                     player_one_health_image.get_size(), 
-                                     (self.width/const.WIDTH, 
-                                      self.height/const.HEIGHT))))
         
-        self.screen.blit(player_one_health_image, 
-                         (self.width*const.HEALTH_BAR_COEF, 
-                          self.height*const.HEALTH_BAR_COEF))
+        health_img = self._set_health_img(self.player_one.features.health)
+        self.screen.blit(health_img, (self.width*const.HEALTH_BAR_COEF, 
+                                    self.height*const.HEALTH_BAR_COEF)) 
         
         if self.is_two_players:
-            player_two_health_image = \
-                  pg.transform.scale(pg.image.load(mu.health_bar[ceil( \
-                      self.player_two.features.health \
-                      /(const.DEFAULT_PLAYER_HEALTH/10))]), 
-                      player_one_health_image.get_size())
-            self.screen.blit(player_two_health_image, 
-                             (self.width*(1-5*const.HEALTH_BAR_COEF), 
-                              self.height*const.HEALTH_BAR_COEF))       
+            health_img = self._set_health_img(self.player_two.features.health)
+            self.screen.blit(health_img, 
+                    (self.width*(1-5*const.HEALTH_BAR_COEF), 
+                    self.height*const.HEALTH_BAR_COEF))   
 
+    def _set_health_img(self, health):
+        health_index = ceil(health/(const.DEFAULT_PLAYER_HEALTH/10))
+        if not hasattr(self, f'health_img_{health_index}'):
+            img = pg.image.load(mu.health_bar[health_index])
+            setattr(self, f'health_img_{health_index}', 
+                    pg.transform.scale(img, 
+                                    (int(self.width/const.WIDTH * img.get_width()),
+                                    int(self.height/const.HEIGHT * img.get_height()))))
+        
+        return getattr(self, f'health_img_{health_index}')
     def new_wave(self):
         if self.is_new_wave:
             self.is_new_wave = False
@@ -456,7 +454,10 @@ class Game_process:
             else:
                 self.player_one.rect.x = self.width/2 - 20
                 self.player_one.rect.y = self.height - 80        
-        self.new_wave()
+
+        wave_thread = threading.Thread(target=self.new_wave)
+        wave_thread.start()
+
         mobs_num = len(mobs)
         all_sprites.update()
         if mobs_num > len(mobs):
